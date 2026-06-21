@@ -922,16 +922,17 @@
                     cell.appendChild(swaps);
                 }
 
-                wrap.addEventListener('mousedown', async (e) => {
+                const handlePress = async (e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     cellStates[i] = 'modeB';
-
                     drawVariant(canvas, MOTU_LIB[i].name, MOTU_LIB[i].b64);
-
                     const label = wrap.querySelector('.label');
                     if (label) label.textContent = `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}*`
+                };
 
-                });
+                wrap.addEventListener('mousedown', handlePress);
+                wrap.addEventListener('touchstart', handlePress);
 
                 const restoreToOrigDrawing = async () => {
                     if (cellStates[i] === 'modeB') {
