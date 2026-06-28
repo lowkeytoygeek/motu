@@ -91,7 +91,6 @@
             background-image: var(--cell-noise);
             background-size: 64px 64px;
             image-rendering: pixelated;
-
             padding-top: 8%;
             padding-bottom: 12%;
         }
@@ -118,19 +117,20 @@
 
         .cell .label {
             position: absolute;
-            bottom: 0;
+            top: 97%;
             left: 0;
             right: 0;
             padding: 3px 5px;
-            font-family: var(--font-mono);
+            font-family: system-ui;
             font-size: 8px;
-            color: #E8E2D9;
-            background: rgba(30, 24, 20, 0.9);
+            color: #e4dacc;
+            background: #ffffff00;
             opacity: 0;
             transition: opacity 0.12s ease;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: center;
         }
 
         .cell:hover .label {
@@ -398,8 +398,9 @@
                         catalog is the second one).</p>
                     <p>Interactivity: Hold mousebutton on a character to reveal character's special gimmick if
                         available.</br></p>
-                    <p></p>
+                        <p></p>
                     <p>Bonus thingy: <a href="https://lowkeytoygeek.github.io/motu/motuAnimGrid.html">grid animation</a></p>
+                    
 
                 </div>
 
@@ -428,6 +429,9 @@
     </div>
 
     <script>
+
+        const SHOW_LABELS = true;
+
         function showTab(name) {
             document.getElementById('tab-archive').style.display = name === 'archive' ? '' : 'none';
             document.getElementById('tab-about').style.display = name === 'about' ? '' : 'none';
@@ -671,9 +675,9 @@
                 }
             }
             const label = canvases[i].parentElement.querySelector('.label');
-            if (label) label.textContent = isVariant
-                ? `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}*`
-                : `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}`;
+            if (label && SHOW_LABELS) label.textContent = isVariant
+                ? `${MOTU_LIB[i].name}*`
+                : `${MOTU_LIB[i].name}`;
         }
 
         function hexToRgb(hex) {
@@ -773,7 +777,8 @@
 
                 const label = document.createElement('div');
                 label.className = 'label';
-                label.textContent = `${b.id}. ${b.name}`;
+                //label.textContent = `${b.id}. ${b.name}`;
+                if(SHOW_LABELS) label.textContent = `${b.name}`;
 
                 wrap.appendChild(canvas);
                 wrap.appendChild(label);
@@ -794,7 +799,8 @@
 
                     drawVariant(canvas, MOTU_LIB[i].name, MOTU_LIB[i].b64, MOTU_LIB[i].variantHeight);
                     const label = wrap.querySelector('.label');
-                    if (label) label.textContent = `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}*`
+                    //if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}*`
+                    if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].name}*`
                 };
 
                 wrap.addEventListener('mousedown', handlePress);
@@ -812,7 +818,8 @@
                         canvas.style.bottom = '';
                         canvas.style.height = '';
                         const label = wrap.querySelector('.label');
-                        if (label) label.textContent = `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}`;
+                        //if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].id}. ${MOTU_LIB[i].name}`;
+                        if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].name}`;
                     }
                 };
 
