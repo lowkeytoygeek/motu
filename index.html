@@ -808,16 +808,12 @@ const RLE_VARIANTS = {
 
         ];
 
-
         let sortingMethod = 0;
-
         MOTU_LIB.forEach(b => b.colorIndex = colorToSortKey(rleDominantColor(b.name)));
-
         const MOTU_LIB_ORIG = [...MOTU_LIB];
 
         function sortBySeries() {
             sortingMethod = 0;
-
             MOTU_LIB.sort((a, b) => {
                 const ai = MOTU_LIB_ORIG.indexOf(a);
                 const bi = MOTU_LIB_ORIG.indexOf(b);
@@ -839,50 +835,49 @@ const RLE_VARIANTS = {
         
         function sortByColor() {
             sortingMethod = 4;
-            
             if(reverseColorSort)
             {
                 MOTU_LIB.sort((b, a) => {
-                const ai = MOTU_LIB_ORIG.indexOf(a);
-                const bi = MOTU_LIB_ORIG.indexOf(b);
-                if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
-                return ai - bi;
-            });
+                    const ai = MOTU_LIB_ORIG.indexOf(a);
+                    const bi = MOTU_LIB_ORIG.indexOf(b);
+                    if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
+                    return ai - bi;
+                });
             }
             else 
             {
                 MOTU_LIB.sort((a, b) => {
-                const ai = MOTU_LIB_ORIG.indexOf(a);
-                const bi = MOTU_LIB_ORIG.indexOf(b);
-                if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
-                return ai - bi;
-            });
+                    const ai = MOTU_LIB_ORIG.indexOf(a);
+                    const bi = MOTU_LIB_ORIG.indexOf(b);
+                    if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
+                    return ai - bi;
+                });
             }
             
             reverseColorSort = !reverseColorSort;
         }
 
         var reverseAlignSort = false;
-        
         function sortByType() {
+            sortBySeries();
             sortingMethod = 6;
 
             if(reverseAlignSort) 
             {
                 MOTU_LIB.sort(function (b, a) {
-                var textA = a.alignment.toUpperCase();
-                var textB = b.alignment.toUpperCase();
-                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-            });
+                    var textA = a.alignment.toUpperCase();
+                    var textB = b.alignment.toUpperCase();
+                    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+                });
             }
             
             else 
             {
                 MOTU_LIB.sort(function (a, b) {
-                var textA = a.alignment.toUpperCase();
-                var textB = b.alignment.toUpperCase();
-                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-            });
+                    var textA = a.alignment.toUpperCase();
+                    var textB = b.alignment.toUpperCase();
+                    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+                });
             }
 
             reverseAlignSort = !reverseAlignSort;
