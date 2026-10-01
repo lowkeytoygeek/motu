@@ -95,7 +95,7 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            transition: transform 0.12s ease;
+            transition: transform 0.12s ease, background-color 0.6s ease;
             background-image: var(--cell-noise);
             background-size: 64px 64px;
             image-rendering: pixelated;
@@ -112,6 +112,7 @@
             position: relative;
             width: 100%;
             aspect-ratio: 1;
+
         }
 
         .cell canvas {
@@ -119,6 +120,7 @@
             height: 100%;
             image-rendering: pixelated;
             display: block;
+
         }
 
         .cell .label {
@@ -372,7 +374,9 @@
 
                 <button class="sort-btn" id="sort-8" onclick="setSorting(8)" title="Randomize">random</button>
 
-                <button class="sort-btn active" id="sort-9" onclick="setSorting(9)" title="Randomize and animate">animate</button>
+                <button class="sort-btn" id="sort-9" onclick="setSorting(9)"
+                    title="Randomize and animate">animate</button>
+
             </div>
 
             <div class="sort-bar">
@@ -384,11 +388,8 @@
             </div>
 
             <div class="grid" id="grid"></div>
-
             <div class="footer"></div>
-
             <div class="section-label" id="stats"></div>
-
 
         </div>
         <!-- /tab-archive -->
@@ -439,6 +440,14 @@
             document.querySelectorAll('.tab-btn').forEach((btn, i) => {
                 btn.classList.toggle('active', (i === 0) === (name === 'archive'));
             });
+
+            if (animActive) {
+                if (name === 'archive') {
+                    if (animTimers.length === 0 && !document.hidden) animStartTimers();
+                } else {
+                    animClearTimers();
+                }
+            }
         }
 
         const RLE_COLOR_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz";
@@ -694,18 +703,15 @@ const RLE_VARIANTS = {
             return out;
         }
 
-        // variant = varianttikuvan numero (0, 1, ...); ilman sitä palautetaan hahmon pääkuva
         function rleGet(name, variant) {
             const [w, h, palHex, str] = (variant == null ? RLE_IMAGES[name] : RLE_VARIANTS[name][variant]);
             return { w, h, pal: rleParsePalette(palHex), idx: rleDecode(str, w, h) };
         }
 
-        // Kuinka monta varianttikuvaa hahmolla on (0 = ei yhtään)
         function rleVariantCount(name) {
             return RLE_VARIANTS[name] ? RLE_VARIANTS[name].length : 0;
         }
 
-        // mirror = true piirtää kuvan vaakasuunnassa peilattuna; variant = varianttikuvan numero
         function rleDrawToCanvas(canvas, name, mirror, variant) {
             const { w, h, pal, idx } = rleGet(name, variant);
             canvas.width = w;
@@ -730,11 +736,11 @@ const RLE_VARIANTS = {
             { series: 1, id: 6, name: "Stratos", alignment: "he-man" },
             { series: 1, id: 7, name: "Merman", alignment: "skeletor" },
             { series: 1, id: 8, name: "Zodak", alignment: "he-man" },
+            
             { series: 2, id: 9, name: "Man-E-Faces", alignment: "he-man" },
             { series: 2, id: 10, name: "Ram-Man", alignment: "he-man" },
             { series: 2, id: 11, name: "Tri-Klops", alignment: "skeletor" },
             { series: 2, id: 12, name: "Trapjaw", alignment: "skeletor" },
-
             { series: 2, id: 13, name: "Evil-Lyn", alignment: "skeletor" },
             { series: 2, id: 14, name: "Mekaneck", variantHeight: 40, alignment: "he-man" },
             { series: 2, id: 15, name: "Faker", alignment: "skeletor" },
@@ -802,6 +808,7 @@ const RLE_VARIANTS = {
 
         ];
 
+
         let sortingMethod = 0;
 
         MOTU_LIB.forEach(b => b.colorIndex = colorToSortKey(rleDominantColor(b.name)));
@@ -810,13 +817,12 @@ const RLE_VARIANTS = {
 
         function sortBySeries() {
             sortingMethod = 0;
-            //MOTU_LIB.sort(function (a, b) { return a.series - b.series });
 
             MOTU_LIB.sort((a, b) => {
                 const ai = MOTU_LIB_ORIG.indexOf(a);
                 const bi = MOTU_LIB_ORIG.indexOf(b);
                 if (a.series !== b.series) return a.series - b.series;
-                return ai - bi; // tasapelit alkuperäiseen järjestykseen
+                return ai - bi;
             });
         }
 
@@ -829,25 +835,57 @@ const RLE_VARIANTS = {
             });
         }
 
+        var reverseColorSort = false;
+        
         function sortByColor() {
             sortingMethod = 4;
-            MOTU_LIB.sort((a, b) => {
+            
+            if(reverseColorSort)
+            {
+                MOTU_LIB.sort((b, a) => {
                 const ai = MOTU_LIB_ORIG.indexOf(a);
                 const bi = MOTU_LIB_ORIG.indexOf(b);
                 if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
-                return ai - bi; // tasapelit alkuperäiseen järjestykseen
+                return ai - bi;
             });
+            }
+            else 
+            {
+                MOTU_LIB.sort((a, b) => {
+                const ai = MOTU_LIB_ORIG.indexOf(a);
+                const bi = MOTU_LIB_ORIG.indexOf(b);
+                if (a.colorIndex !== b.colorIndex) return a.colorIndex - b.colorIndex;
+                return ai - bi;
+            });
+            }
+            
+            reverseColorSort = !reverseColorSort;
         }
 
+        var reverseAlignSort = false;
+        
         function sortByType() {
             sortingMethod = 6;
 
-            MOTU_LIB.sort(function (a, b) {
+            if(reverseAlignSort) 
+            {
+                MOTU_LIB.sort(function (b, a) {
                 var textA = a.alignment.toUpperCase();
                 var textB = b.alignment.toUpperCase();
                 return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
             });
+            }
+            
+            else 
+            {
+                MOTU_LIB.sort(function (a, b) {
+                var textA = a.alignment.toUpperCase();
+                var textB = b.alignment.toUpperCase();
+                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+            });
+            }
 
+            reverseAlignSort = !reverseAlignSort;
         }
 
         function sortRandom() {
@@ -878,6 +916,23 @@ const RLE_VARIANTS = {
             return null;
         }
 
+        function applyVariantSize(canvas, figureName, v) {
+            const main = RLE_IMAGES[figureName];
+            if (v && main && v.h !== main[1]) {
+                canvas.style.position = 'absolute';
+                canvas.style.bottom = '0';
+                canvas.style.width = '100%';
+                canvas.style.height = (v.h / main[1] * 100) + '%';   // esim. 40/32*100 = 125 %
+            }
+        }
+
+        function resetCanvasSize(canvas) {
+            canvas.style.position = '';
+            canvas.style.bottom = '';
+            canvas.style.width = '';
+            canvas.style.height = '';
+        }
+
         const cellStates = new Array(MOTU_LIB.length).fill('modeA');
         const canvases = [];
 
@@ -902,7 +957,6 @@ const RLE_VARIANTS = {
             for (let i = 0; i < MOTU_LIB.length; i++) {
                 const b = MOTU_LIB[i];
 
-
                 if (sortingMethod == 0 && b.series !== currentSeries) {
                     currentSeries = b.series;
                     const header = document.createElement('div');
@@ -926,7 +980,6 @@ const RLE_VARIANTS = {
 
                 const label = document.createElement('div');
                 label.className = 'label';
-                //label.textContent = `${b.id}. ${b.name}`;
                 if(SHOW_LABELS) label.textContent = `${b.name}`;
 
                 wrap.appendChild(canvas);
@@ -938,24 +991,14 @@ const RLE_VARIANTS = {
                     e.stopPropagation();
 
                     if (sortingMethod === 9) {
-                        // Animate-tila: pohjassa pidettäessä hahmon värit kiertävät nopeasti
-                        if (animBusy.has(i)) return; // paikanvaihto kesken, kuva liikkuu
+                        if (animBusy.has(i)) return;
+                        animCancelVariant(i);
                         cellStates[i] = 'modeB';
                         startPaletteCycle(canvas, MOTU_LIB[i].name);
                     } else {
-                        // Muut tilat: peilikuva
                         cellStates[i] = 'modeB';
-                        //drawMirrored(canvas, MOTU_LIB[i].name);
-
                         const v = drawVariant(canvas, MOTU_LIB[i].name);
-                        const main = RLE_IMAGES[MOTU_LIB[i].name];
-                        if (v && main && v.h !== main[1]) {
-                            // Varianttikuva on eri korkuinen kuin pääkuva: canvas kasvaa solun pohjasta ylöspäin
-                            canvas.style.position = 'absolute';
-                            canvas.style.bottom = '0';
-                            canvas.style.width = '100%';
-                            canvas.style.height = (v.h / main[1] * 100) + '%';   // esim. 40/32*100 = 125 %
-                        }
+                        applyVariantSize(canvas, MOTU_LIB[i].name, v);
                     }
                     const label = wrap.querySelector('.label');
                     if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].name}*`
@@ -969,11 +1012,7 @@ const RLE_VARIANTS = {
                         cellStates[i] = 'modeA';
                         stopPaletteCycle(canvas);
                         restoreDrawing(canvas);
-                        // Nollaa mahdollinen varianttikuvan koko
-                        canvas.style.position = '';
-                        canvas.style.bottom = '';
-                        canvas.style.width = '';
-                        canvas.style.height = '';
+                        resetCanvasSize(canvas);
                         const label = wrap.querySelector('.label');
                         if (label && SHOW_LABELS) label.textContent = `${MOTU_LIB[i].name}`;
                     }
@@ -1009,13 +1048,15 @@ const RLE_VARIANTS = {
         }
 
         const ANIM = {
-            flipEvery: 220,
-            colorEvery: 110,
-            swapEvery: 3500,
+            flipEvery: 150,
+            colorEvery: 140,
+            swapEvery: 2800,
+            variantEvery: 2000,
+            variantMs: 1000,
             swapMode: 'fade',
-            swapMs: 300,
+            swapMs: 450,
             cycleMs: 80,
-            cycleTop: 0,
+            cycleTop: 0,         // 0 = kaikki värit kiertävät, muuten vain N yleisintä väriä
             colors: ["#103010", "#202020", "#220022", "#400000", "#002232", "#202200", "#111133"]
         };
 
@@ -1024,8 +1065,14 @@ const RLE_VARIANTS = {
         let animTimers = [];
         let animCells = [];
         const animBusy = new Set();
+        const animVariants = new Map();
 
         function animPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // Solua saa animoida, jos sitä ei paineta, vaihdeta tai näytetä varianttina
+        function animFree(i) {
+            return cellStates[i] !== 'modeB' && !animBusy.has(i) && !animVariants.has(i);
+        }
 
         function animChangeColor() {
             if (animCells.length === 0) return;
@@ -1034,45 +1081,44 @@ const RLE_VARIANTS = {
 
         function animFlip() {
             const i = Math.floor(Math.random() * canvases.length);
-            if (cellStates[i] === 'modeB' || animBusy.has(i)) return;
+            if (!animFree(i)) return;
             const c = canvases[i];
             c.style.transform = c.style.transform === 'scaleX(-1)' ? '' : 'scaleX(-1)';
         }
 
-        function animVariantFlip() {
-            const i = Math.floor(Math.random() * canvases.length);
-            if (cellStates[i] === 'modeB' || animBusy.has(i)) return;
-
-            cellStates[i] = 'modeB';
-            const c = canvases[i];
-
-            const v = drawVariant(c, MOTU_LIB[i].name);
-            const main = RLE_IMAGES[MOTU_LIB[i].name];
-            if (v && main && v.h !== main[1]) {
-                // Varianttikuva on eri korkuinen kuin pääkuva: canvas kasvaa solun pohjasta ylöspäin
-                c.style.position = 'absolute';
-                c.style.bottom = '0';
-                c.style.width = '100%';
-                c.style.height = (v.h / main[1] * 100) + '%';   // esim. 40/32*100 = 125 %
+        function animVariant() {
+            const candidates = [];
+            for (let i = 0; i < canvases.length; i++) {
+                if (animFree(i) && rleVariantCount(MOTU_LIB[i].name) > 0) candidates.push(i);
             }
+            if (candidates.length === 0) return;
 
-            setTimeout(() => {
-                cellStates[i] = 'modeA';
-                restoreDrawing(c);
-                // Nollaa mahdollinen varianttikuvan koko
-                c.style.position = '';
-                c.style.bottom = '';
-                c.style.width = '';
-                c.style.height = '';
+            const i = animPick(candidates);
+            const name = MOTU_LIB[i].name;
+            const v = drawVariant(canvases[i], name);
+            applyVariantSize(canvases[i], name, v);
 
-            }, 700);
+            const token = animToken;
+            animVariants.set(i, setTimeout(() => {
+                animVariants.delete(i);
+                if (token !== animToken) return;
+                restoreDrawing(canvases[i]);
+                resetCanvasSize(canvases[i]);
+            }, ANIM.variantMs));
+        }
 
+        function animCancelVariant(i) {
+            if (!animVariants.has(i)) return;
+            clearTimeout(animVariants.get(i));
+            animVariants.delete(i);
+            restoreDrawing(canvases[i]);
+            resetCanvasSize(canvases[i]);
         }
 
         function animSwap() {
             const free = [];
             for (let i = 0; i < canvases.length; i++) {
-                if (cellStates[i] !== 'modeB' && !animBusy.has(i)) free.push(i);
+                if (animFree(i)) free.push(i);
             }
             if (free.length < 2) return;
 
@@ -1128,7 +1174,7 @@ const RLE_VARIANTS = {
                 wrapB.style.transform = `translate(${-dx}px, ${-dy}px)`;
                 setTimeout(() => {
                     if (token !== animToken) return;
-                    
+                    // Kuvat ovat nyt toistensa paikalla: vaihdetaan data ja nollataan siirto samalla hetkellä (ei hyppyä)
                     applySwap();
                     for (const w of [wrapA, wrapB]) { w.style.transition = 'none'; w.style.transform = ''; }
                     cellA.style.zIndex = cellB.style.zIndex = '';
@@ -1182,9 +1228,10 @@ const RLE_VARIANTS = {
         }
 
         function animStartTimers() {
-            animTimers.push(setInterval(animVariantFlip, ANIM.flipEvery));
+            animTimers.push(setInterval(animFlip, ANIM.flipEvery));
             animTimers.push(setInterval(animChangeColor, ANIM.colorEvery));
             animTimers.push(setInterval(animSwap, ANIM.swapEvery));
+            animTimers.push(setInterval(animVariant, ANIM.variantEvery));
         }
 
         function animClearTimers() {
@@ -1205,6 +1252,8 @@ const RLE_VARIANTS = {
             animToken++;
             animClearTimers();
             animBusy.clear();
+            animVariants.forEach(clearTimeout);
+            animVariants.clear();
             animCells = [];
             stopAllPaletteCycles();
         }
@@ -1233,7 +1282,6 @@ const RLE_VARIANTS = {
             else if (method === 6) sortByType();
 
             else if (method === 8) sortRandom();
-
 
             else if (method === 9) {
                 sortRandom();
@@ -1271,6 +1319,7 @@ const RLE_VARIANTS = {
             });
 
             statsDiv.innerHTML += `<p></br></p>`;
+
         }
 
         function protectGrid() {
@@ -1282,6 +1331,7 @@ const RLE_VARIANTS = {
         async function init() {
             protectGrid();
             await setSorting(9);
+            setColumns(8);
         }
 
         init();
